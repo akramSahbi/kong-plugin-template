@@ -28,15 +28,17 @@ ignore = {
 
 
 include_files = {
-    "**/*.lua",
+    "kong/**/*.lua",
     "*.rockspec",
     ".busted",
     ".luacheckrc",
 }
 
 exclude_files = {
-    --"spec/fixtures/invalid-module.lua",
-    --"spec-old-api/fixtures/invalid-module.lua",
+    -- github actions ci files
+    ".lua/**/*.lua",
+    ".install/**/*.lua",
+    ".luarocks/**/*.lua",
 }
 
 

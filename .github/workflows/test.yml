@@ -1,0 +1,53 @@
+name: "Test"
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        kongVersion:
+        - "2.3.x"
+        - "2.4.x"
+        - "nightly"
+        - "2.3.3.x"
+        - "2.4.1.x"
+        - "nightly-ee"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: pongo setup
+      env:
+        KONG_VERSION: ${{ matrix.kongVersion }}
+      run: |
+        git clone https://github.com/Kong/kong-pongo .pongo_repo
+
+    - name: pongo up & build
+      env:
+        KONG_VERSION: ${{ matrix.kongVersion }}
+      run: |
+        .pongo_repo/pongo.sh up
+        .pongo_repo/pongo.sh build
+
+    - name: pongo run
+      env:
+        KONG_VERSION: ${{ matrix.kongVersion }}
+      run: |
+        .pongo_repo/pongo.sh run -- --coverage
+
+    - name: Report test coverage
+      if: success()
+      continue-on-error: true
+      run: luacov-coveralls
+      env:
+        COVERALLS_REPO_TOKEN: ${{ github.token }}
+
+    - name: pongo down
+      env:
+        KONG_VERSION: ${{ matrix.kongVersion }}
+      run: |
+        .pongo_repo/pongo.sh down
