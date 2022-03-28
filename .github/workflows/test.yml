@@ -18,26 +18,35 @@ jobs:
         - "nightly-ee"
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: pongo setup
+      uses: actions/checkout@v3
+      with:
+        repository: Kong/kong-pongo
+        ref: master
+        path: ./.kong-pongo
+
+    - name: download license
       env:
-        KONG_VERSION: ${{ matrix.kongVersion }}
+        PULP_PASSWORD: ${{ secrets.pulp_download_prod }}
       run: |
-        git clone https://github.com/Kong/kong-pongo .pongo_repo
+        git clone --depth=1 -b automation --single-branch https://github.com/Kong/kong-license.git .kong-license
+        export KONG_LICENSE_DATA=$(./.kong-license/auto-license.sh)
 
     - name: pongo up & build
       env:
         KONG_VERSION: ${{ matrix.kongVersion }}
+        PULP_PASSWORD: ${{ secrets.pulp_download_prod }}
       run: |
-        .pongo_repo/pongo.sh up
-        .pongo_repo/pongo.sh build
+        .kong-pongo/pongo.sh up
+        .kong-pongo/pongo.sh build
 
     - name: pongo run
       env:
         KONG_VERSION: ${{ matrix.kongVersion }}
       run: |
-        .pongo_repo/pongo.sh run -- --coverage
+        .kong-pongo/pongo.sh run -- --coverage
 
     - name: Report test coverage
       if: success()
@@ -47,7 +56,5 @@ jobs:
         COVERALLS_REPO_TOKEN: ${{ github.token }}
 
     - name: pongo down
-      env:
-        KONG_VERSION: ${{ matrix.kongVersion }}
       run: |
-        .pongo_repo/pongo.sh down
+        .kong-pongo/pongo.sh down
