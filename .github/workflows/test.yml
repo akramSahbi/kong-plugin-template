@@ -45,6 +45,7 @@ jobs:
     - name: pongo run
       env:
         KONG_VERSION: ${{ matrix.kongVersion }}
+        PULP_USERNAME: admin
         PULP_PASSWORD: ${{ secrets.PULP_PASSWORD }}
       run: |
         .kong-pongo/pongo.sh run -- --coverage
