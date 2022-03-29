@@ -27,11 +27,16 @@ jobs:
         ref: master
         path: ./.kong-pongo
 
+    - name: download license script
+      uses: actions/checkout@v3
+      with:
+        repository: Kong/kong-license
+        path: ./.kong-license
+
     - name: download license
       env:
         PULP_PASSWORD: ${{ secrets.pulp_download_prod }}
       run: |
-        git clone --depth=1 -b automation --single-branch https://github.com/Kong/kong-license.git .kong-license
         export KONG_LICENSE_DATA=$(./.kong-license/auto-license.sh)
 
     - name: pongo up & build
