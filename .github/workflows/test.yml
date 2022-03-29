@@ -53,7 +53,9 @@ jobs:
     - name: Report test coverage
       if: success()
       continue-on-error: true
-      run: luacov-coveralls
+      run: |
+        luarocks install luacov-coveralls
+        luacov-coveralls
       env:
         COVERALLS_REPO_TOKEN: ${{ github.token }}
 
